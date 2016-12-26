@@ -1,0 +1,145 @@
+ //自定义指令的呈现形式
+    //1.E标签 2.A属性 3.C类样式
+    var app=angular.module('myApp',[]);
+    app.directive('myHello',function () {
+      return {
+            template:'<h1>myHello</h1>',
+             restrict:'EC' //restrict用来限制自定义呈现形式【restrict意思为限制，限定】
+            }
+    })
+
+
+
+》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》
+
+
+app.directive('myHello',function () {
+       //返回一个对象
+        //template(模版)
+        //replace 去除外部的自定义指令标签  【替换的意思】
+        return {
+            template:'<h1>MyHello</h1>',
+            replace:true
+        }
+    });
+
+
+》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》
+ //在模版内部添加ng-transclude是告诉外部的值传递进来以后修改其标签中间的内容
+app.directive('myHello',function () {
+   return {
+            template:'<div>' +
+            '<h1 ng-transclude></h1><h2 ng-transclude></h2>' +
+            '</div>',
+              transclude:true
+        }
+    });
+
+》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》
+
+app.directive('myLink',function () {
+      return {
+            link:function (scope,ele,attr) {
+                console.log(scope);
+                console.log(ele);
+                console.log(attr);
+                //ele就是咱们的jqLite元素
+                ele.on('click',function () {
+                    console.log('这是jqLite的做出来的log');
+                })
+                //在angular中所有的dom处理建议在自定义指令中完成
+            }
+        }
+    })
+
+
+》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》
+
+正确的多模块开发
+<div ng-app="mainApp">
+    <div ng-controller="myCtrl">
+        {{name}}
+    </div>
+    <div ng-controller="myCtrl2">
+        {{name}}
+    </div>
+</div>
+</body>
+<script src="./angular.js"></script>
+
+    //创建模块和控制器
+    //angular中的多模块开发不是多个模块再去使用多个ng-app
+    //angular的多模块开发正确方式
+    //1.确定主模块
+    //2.其他的子模块，添加到主模块的中括号中
+    //3.那么子模块就可以使用了
+    var app=angular.module('mainApp',['myApp2']);
+    app.controller('myCtrl',function ($scope) {
+        $scope.name='myAppmyCtrl';
+    });
+    var app2=angular.module('myApp2',[]);
+    app2.controller('myCtrl2',function ($scope) {
+        $scope.name='myApp2myCtrl2';
+    })
+
+》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》.
+
+     //自定义服务直接用服务名引用，直接调用里面的属性和方法
+     app.service('myService',function(){
+         this.name="飞飞";
+          this.add=function(v1,v2){
+                return v1+v2;
+          }
+     })
+    app.controller('myCtrl',function ($scope,myService,$log) {
+        console.log(myService.add(1,2));
+        console.log(myService.name);
+      
+    })
+
+》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》》
+
+
+
+angular  路由！！！！！！！！！！
+<script src="angular-route/angular-route.js"></script>
+<script>
+    // 2创建模块
+    var app = angular.module('myApp', ['ngRoute']);
+    //3写路由表
+    //通过config来配置你的路由表
+    //$routeProvider用他来配置路由表
+    app.config(function ($routeProvider) {
+        $routeProvider.when('/my', {
+            template: '<h1>我的音乐</h1>'
+        }).when('/friend', {
+            template: '<h1>{{name}}</h1>',
+            controller: 'myCtrl2'
+        }).when('/friend/:n', {
+            template: '<h1>{{name}}</h1>',
+            controller: function ($scope) {
+                //有控制器名称的用法
+                $scope.name = '朋友1';
+            }
+        }).when('/friend2', {
+            templateUrl: '1.html',
+            controller: function ($scope) {
+                //有控制器名称的用法
+                $scope.name = '朋友2';
+            }
+        }).otherwise({
+//            如果找不到锚点，就重新定位到/my
+            redirectTo:"/my"
+        })
+    })
+    app.controller('myCtrl', function ($scope) {
+        //有控制器名称的用法
+        $scope.name = '朋友';
+    });
+
+    app.controller('myCtrl2', function ($scope) {
+        //有控制器名称的用法
+        $scope.name = '这是从html模板中获取的数据';
+    });
+</script>
+
